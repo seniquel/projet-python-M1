@@ -2,7 +2,7 @@
 import numpy as np
 from collections import namedtuple
 
-Pos=namedtuple("Pos","i,j") #i=ligne j=colonne par convention sur les matrices
+Pos=namedtuple("Pos","i,j") #i=ligne j=colonne
 
 def setupTab():
     tab=np.zeros((8,8))
@@ -11,16 +11,7 @@ def setupTab():
     tab[3][4]=-1
     tab[4][3]=-1
     return tab
-#def checkMove(pos,tab,tour):
-#    """vérifie si jouer sur la position x,y complètera une ligne"""
-#    #pos=Pos(x=pos[0],y=pos[1])
-#    if pos.j==0 or pos.j==1 or pos.j==7 or pos.j==6:
-#        return False
-#    if pos.i==0 or pos.i==1 or pos.i==7 or pos.i==6:
-#        return False
-#    if tab[pos.i,pos.j] == 0:
-#       
-   
+
 def checkGauche(pos,tab,tour):
     count=0
     if pos.j<=1:
@@ -136,5 +127,32 @@ def coupPossible(tab,tour):
         for j1 in range(8):
             pos=Pos(i=i1,j=j1)
             if checkAll(pos,tab,tour):
-                coups=np.append(coups,pos,0)
+                coups.append(pos)
     return coups
+def nextTable(pos,tabEntree,tour):
+    tab=np.copy(tabEntree)
+    for k in range(1,checkGauche(pos,tab,tour)+1):
+        tab[pos.i,pos.j-k]*=-1
+    for k in range(1,checkDroite(pos,tab,tour)+1):
+        tab[pos.i,pos.j+k]*=-1
+    for k in range(1,checkHaut(pos,tab,tour)+1):
+        tab[pos.i-k,pos.j]*=-1
+    for k in range(1,checkBas(pos,tab,tour)+1):
+        tab[pos.i+k,pos.j]*=-1
+    for k in range(1,checkDiagHG(pos,tab,tour)+1):
+        tab[pos.i-k,pos.j-k]*=-1
+    for k in range(1,checkDiagHD(pos,tab,tour)+1):
+        tab[pos.i-k,pos.j+k]*=-1
+    for k in range(1,checkDiagBG(pos,tab,tour)+1):
+        tab[pos.i+k,pos.j-k]*=-1
+    for k in range(1,checkDiagBD(pos,tab,tour)+1):
+        tab[pos.i+k,pos.j+k]*=-1
+    return tab
+
+def calcPoints(tab,tour):
+    count=0
+    for i in range(8):
+        for j in range(8):
+            if tab[i,j]==tour:
+                count+=1
+    return count
