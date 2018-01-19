@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+#!/usr/bin/python
 import numpy as np
 from collections import namedtuple
 
@@ -41,7 +42,7 @@ def checkHaut(pos,tab,tour):
     if pos.i<=1:
         return False
     if tab[pos.i-1,pos.j]==-tour: #vérifie en haut
-        for i in tab[pos.i-2,pos.j::-1]:
+        for i in tab[pos.i-2::-1,pos.j]:
             count+=1
             if i==tour:
                 return count
@@ -53,7 +54,7 @@ def checkBas(pos,tab,tour):
     if pos.i>=6:
         return False
     if tab[pos.i+1,pos.j]==-tour: #vérifie en bas
-      for i in tab[pos.i+2,pos.j:]:
+      for i in tab[pos.i+2:,pos.j]:
           count+=1
           if i==tour:
               return count 
@@ -69,7 +70,7 @@ def checkDiagHG(pos,tab,tour):
         jj=range(pos.j-1,-1,-1)
         for i,j in zip(ii,jj):
             count+=1
-            if i==tour:
+            if tab[i,j]==tour:
                 return count
             if tab[i,j]==0:
                 return False
@@ -80,7 +81,7 @@ def checkDiagHD(pos,tab,tour):
         return False
     if tab[pos.i-1,pos.j+1]==-tour: #vérifie diagonale en haut à droite
         ii=range(pos.i-1,-1,-1)
-        jj=range(pos.i+1,8)
+        jj=range(pos.j+1,8)
         for i,j in zip(ii,jj):
             count+=1
             if tab[i,j]==tour:
@@ -117,10 +118,13 @@ def checkDiagBD(pos,tab,tour):
                 return False
     return False
 def checkAll(pos,tab,tour):
-    return checkHaut(pos,tab,tour) or checkBas(pos,tab,tour) or \
-    checkGauche(pos,tab,tour) or checkDroite(pos,tab,tour) or \
-    checkDiagHG(pos,tab,tour) or checkDiagBG(pos,tab,tour) or \
-    checkDiagHD(pos,tab,tour) or checkDiagBD(pos,tab,tour)
+    if tab[pos.i,pos.j]==0:
+        return checkHaut(pos,tab,tour) or checkBas(pos,tab,tour) or \
+        checkGauche(pos,tab,tour) or checkDroite(pos,tab,tour) or \
+        checkDiagHG(pos,tab,tour) or checkDiagBG(pos,tab,tour) or \
+        checkDiagHD(pos,tab,tour) or checkDiagBD(pos,tab,tour)
+    else:
+        return False
 def coupPossible(tab,tour):
     coups=[]
     for i1 in range(8):
@@ -131,6 +135,7 @@ def coupPossible(tab,tour):
     return coups
 def nextTable(pos,tabEntree,tour):
     tab=np.copy(tabEntree)
+    tab[pos.i,pos.j]=tour
     for k in range(1,checkGauche(pos,tab,tour)+1):
         tab[pos.i,pos.j-k]*=-1
     for k in range(1,checkDroite(pos,tab,tour)+1):
@@ -139,13 +144,13 @@ def nextTable(pos,tabEntree,tour):
         tab[pos.i-k,pos.j]*=-1
     for k in range(1,checkBas(pos,tab,tour)+1):
         tab[pos.i+k,pos.j]*=-1
-    for k in range(1,checkDiagHG(pos,tab,tour)+1):
+    for k in range(1,checkDiagHG(pos,tab,tour)):
         tab[pos.i-k,pos.j-k]*=-1
-    for k in range(1,checkDiagHD(pos,tab,tour)+1):
+    for k in range(1,checkDiagHD(pos,tab,tour)):
         tab[pos.i-k,pos.j+k]*=-1
-    for k in range(1,checkDiagBG(pos,tab,tour)+1):
+    for k in range(1,checkDiagBG(pos,tab,tour)):
         tab[pos.i+k,pos.j-k]*=-1
-    for k in range(1,checkDiagBD(pos,tab,tour)+1):
+    for k in range(1,checkDiagBD(pos,tab,tour)):
         tab[pos.i+k,pos.j+k]*=-1
     return tab
 
@@ -156,3 +161,6 @@ def calcPoints(tab,tour):
             if tab[i,j]==tour:
                 count+=1
     return count
+
+def diffPoints(tab,tour):
+    return calcPoints(tab,tour) - calcPoints(tab,-tour)
